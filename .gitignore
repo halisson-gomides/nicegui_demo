@@ -1,0 +1,8 @@
+__pycache__/
+.ipynb_checkpoints
+.env
+cafe_env/
+data/*.db
+data/*.sql
+img/produtos/*.png
+img/produtos/*.jpg
