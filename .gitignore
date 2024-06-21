@@ -6,3 +6,5 @@ data/*.db
 data/*.sql
 img/produtos/*.png
 img/produtos/*.jpg
+img/favicon/*.png
+img/favicon/*.ico
