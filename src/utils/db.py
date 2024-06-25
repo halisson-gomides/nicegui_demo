@@ -17,7 +17,7 @@ def new_session():
 @event.listens_for(ProdCategoria.__table__, 'after_create')
 def prd_cat_initial_inserts(target, connection, **kw):
     session = Session(connection)
-    categories = ['Salgados', 'Bebidas', 'Refeições', 'Sobremesas']
+    categories = ['Bebidas', 'Lanches', 'Refeições', 'Salgados', 'Sobremesas']
     for item in categories:
         session.add(ProdCategoria(description=item))    
     session.commit()

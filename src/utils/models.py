@@ -1,7 +1,7 @@
 from sqlalchemy import func, ForeignKey
 from sqlalchemy.orm import Mapped, registry, mapped_column
 from datetime import datetime
-
+import uuid
 
 table_registry = registry()
 
@@ -47,16 +47,30 @@ class Produto:
 class Pedido:
     __tablename__ = 'tab_pedidos'
 
-    id: Mapped[int]             = mapped_column(init=False, primary_key=True, autoincrement=True)
-    req_date: Mapped[datetime]  = mapped_column(init=False, server_default=func.now())
-    table: Mapped[int]          = mapped_column(nullable=False)
-    product_id: Mapped[int]     = mapped_column(ForeignKey('tab_produtos.id'), nullable=False)
-    total_amount: Mapped[int]   = mapped_column(nullable=False)
+    id: Mapped[uuid.UUID]       = mapped_column(init=False, primary_key=True, default_factory=uuid.uuid4)
+    cliente_id: Mapped[int]     = mapped_column(ForeignKey('tab_clientes.id'), nullable=True)
+    table: Mapped[int]          = mapped_column(nullable=False)        
     total_value: Mapped[float]  = mapped_column(nullable=False)
-    cliente_id: Mapped[int]     = mapped_column(ForeignKey('tab_clientes.id'), nullable=False)
+    points: Mapped[int]         = mapped_column(nullable=False)
+    created_at: Mapped[datetime]  = mapped_column(init=False, server_default=func.now())
     
     def __repr__(self):
         return f"Pedido(id={self.id}, mesa={self.table})"
+    
+
+# Definição da tabela Pedido_Produto
+@table_registry.mapped_as_dataclass
+class Pedido_Produtos:
+    __tablename__ = 'tab_pedido_produtos'
+
+    id: Mapped[int]             = mapped_column(init=False, primary_key=True, autoincrement=True)
+    request_id: Mapped[uuid.UUID]  = mapped_column(ForeignKey('tab_pedidos.id'), nullable=False)   
+    product_id: Mapped[int]     = mapped_column(ForeignKey('tab_produtos.id'), nullable=False)
+    amount: Mapped[int]         = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(init=False, server_default=func.now())
+    
+    def __repr__(self):
+        return f"PedidoProdutos(id={self.request_id})"
     
 
 # Definição da tabela Categoria

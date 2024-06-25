@@ -69,9 +69,10 @@ def customer_edit_page(document: str):
         with ui.card():
             ui.label("Edite os dados do Cliente").classes("text-xl font-medium text-wrap text-stone-500")            
         ui.button('Início', on_click=lambda: ui.navigate.to('/'))
-        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/'))
+        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))
         ui.button('Cadastro', on_click=lambda: ui.navigate.to('/cliente_cadastro'))
         ui.button('Clientes', on_click=lambda: ui.navigate.to('/cliente_pesquisa'))
+        ui.button('Produtos', on_click=lambda: ui.navigate.to('/produto_cadastro'))
 
     with ui.card().classes("w-5/6"):        
         with ui.row().classes("w-full"):

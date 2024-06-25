@@ -122,7 +122,7 @@ def customer_search_form(tipo=None, termo=None) -> None:
         with ui.card():    
             ui.label("Relação de Clientes").classes("text-lg font-medium text-stone-500")
         ui.button('Início', on_click=lambda: ui.navigate.to('/'))
-        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/'))    
+        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))    
         ui.button('Cadastro', on_click=lambda: ui.navigate.to('/cliente_cadastro'))
         ui.button('Produtos', on_click=lambda: ui.navigate.to('/produto_cadastro'))
 

@@ -15,7 +15,7 @@ def new_customer_page():
         with ui.card():    
             ui.label("Cadastro de Cliente").classes("text-lg font-medium text-stone-500")
         ui.button('Início', on_click=lambda: ui.navigate.to('/'))
-        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/'))
+        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))
         ui.button('Clientes', on_click=lambda: ui.navigate.to('/cliente_pesquisa'))
         ui.button('Produtos', on_click=lambda: ui.navigate.to('/produto_cadastro'))
 

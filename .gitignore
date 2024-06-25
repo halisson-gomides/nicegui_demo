@@ -1,7 +1,7 @@
 __pycache__/
 .ipynb_checkpoints
 .env
-cafe_env/
+env_nicegui/
 data/*.db
 data/*.sql
 img/produtos/*.png
