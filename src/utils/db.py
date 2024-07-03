@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from utils.models import table_registry
-from utils.models import ProdCategoria, ProdMetrica
+from utils.models import ProdCategoria, ProdMedida
 
 def connect(pathdbfile="data"):
     conn_uri = f'sqlite:///{pathdbfile}/appdatabase.db'
@@ -23,10 +23,10 @@ def prd_cat_initial_inserts(target, connection, **kw):
     session.commit()
 
 
-@event.listens_for(ProdMetrica.__table__, 'after_create')
+@event.listens_for(ProdMedida.__table__, 'after_create')
 def prd_metr_initial_inserts(target, connection, **kw):
     session = Session(connection)
     metrics = ['un', 'kg', 'porção']
     for item in metrics:
-        session.add(ProdMetrica(description=item))    
+        session.add(ProdMedida(description=item))    
     session.commit()

@@ -28,3 +28,7 @@ def validate_type(x, obj_type):
         return True
     except TypeError:
         return False
+    
+
+def comma_num(n,f=''):
+    return ('{'+f+'}').format(n).replace('.',',')

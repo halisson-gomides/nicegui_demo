@@ -15,7 +15,8 @@ def new_customer_page():
         with ui.card():    
             ui.label("Cadastro de Cliente").classes("text-lg font-medium text-stone-500")
         ui.button('Início', on_click=lambda: ui.navigate.to('/'))
-        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))
+        ui.button('Gerar Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))
+        ui.button('Pedidos', on_click=lambda: ui.navigate.to('/pedido_pesquisa'))
         ui.button('Clientes', on_click=lambda: ui.navigate.to('/cliente_pesquisa'))
         ui.button('Produtos', on_click=lambda: ui.navigate.to('/produto_cadastro'))
 
@@ -61,7 +62,7 @@ def new_customer_page():
             dt_birth = None
         
         cliente = models.Cliente(
-            nome=name.value,
+            name=name.value,
             email=email.value,
             document=document_id.value,
             birthdate=dt_birth,

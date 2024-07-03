@@ -14,9 +14,9 @@ def search_product(by:str=None, search_criteria:str=None):
     if not by:
         search_result = session.scalars(select(models.Produto).order_by(models.Produto.description))
     elif by == "price":        
-        search_result = session.scalars(select(models.Produto).where(models.Produto.price == search_criteria))
+        search_result = session.scalars(select(models.Produto).where(models.Produto.price_val == search_criteria))
     elif by == "name": 
-        search_result = session.scalars(select(models.Produto).where(models.Produto.product_desc.ilike(f'%{search_criteria}%')))            
+        search_result = session.scalars(select(models.Produto).where(models.Produto.description.ilike(f'%{search_criteria}%')))            
     return search_result
 
 
@@ -137,12 +137,14 @@ def new_product_page(tipo=None, termo=None):
             return      
         
         imgfile = '/images/sem_foto.png' if image.source == ''  else image.source
+        # categoria = session.query(models.ProdCategoria).get(prod_category.value)
+        # medida = session.query(models.ProdMedida).get(prod_metric.value)
         produto = models.Produto(
-            description = prod_desc.value,
-            category_id = prod_category.value,
-            metric_id = prod_metric.value,
-            price_val = prod_price.value,
-            picture = imgfile       
+            description     = prod_desc.value,
+            category_id     = prod_category.value,
+            measure_id      = prod_metric.value,
+            price_val       = prod_price.value,
+            picture         = imgfile       
         )
         # Tenta inserir no banco
         try:
@@ -166,7 +168,7 @@ def new_product_page(tipo=None, termo=None):
         with ui.card():    
             ui.label("Cadastro de Produto").classes("text-lg font-medium text-stone-500")
         ui.button('Início', on_click=lambda: ui.navigate.to('/'))
-        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))
+        ui.button('Gerar Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))
         ui.button('Cadastro', on_click=lambda: ui.navigate.to('/cliente_cadastro'))     
         ui.button('Clientes', on_click=lambda: ui.navigate.to('/cliente_pesquisa')) 
 
@@ -182,10 +184,10 @@ def new_product_page(tipo=None, termo=None):
                 format='%.2f'
             ).props('mask="#.##" reverse-fill-mask input-class="text-right"'))
         with ui.row().classes("w-full"):
-            prod_categories = session.scalars(select(models.ProdCategoria).order_by(models.ProdCategoria.description)).all()
-            prod_metrics = session.scalars(select(models.ProdMetrica)).all()
+            prod_categories = session.query(models.ProdCategoria).filter(models.ProdCategoria.flag_active == 1).order_by(models.ProdCategoria.description).all()
+            prod_metrics = session.query(models.ProdMedida).filter(models.ProdMedida.flag_active == 1).order_by(models.ProdMedida.description).all()
             prod_category = ui.select({p.id:p.description for p in prod_categories}, with_input=True, label="Categoria do Produto").classes('w-60')
-            prod_metric = ui.select({m.id:m.description for m in prod_metrics}, with_input=True, label="Unidade de venda").classes('w-60')
+            prod_metric = ui.select({m.id:m.description for m in prod_metrics}, with_input=True, label="Formato de venda").classes('w-60')
         with ui.row().classes("w-full"):     
             ui.label("Foto do produto:").classes("q-field__label no-pointer-events")
             prod_img = (ui.upload(

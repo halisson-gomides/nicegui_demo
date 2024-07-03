@@ -16,7 +16,7 @@ def customer_edit_page(document: str):
         if result == "Sim":
             try:
                 session.delete(cliente)
-                ui.notification("Cliente excluído com sucesso!")
+                ui.notification("Cliente excluído com sucesso!", color='positive')
                 session.commit()
                 await asyncio.sleep(2)
                 ui.navigate.to('/cliente_pesquisa')
@@ -44,7 +44,7 @@ def customer_edit_page(document: str):
         except Exception:
             dt_birth = None            
 
-        cliente.nome        = name.value        
+        cliente.name        = name.value        
         cliente.email       = email.value
         cliente.document    = document_id.value
         cliente.birthdate   = dt_birth
@@ -69,14 +69,14 @@ def customer_edit_page(document: str):
         with ui.card():
             ui.label("Edite os dados do Cliente").classes("text-xl font-medium text-wrap text-stone-500")            
         ui.button('Início', on_click=lambda: ui.navigate.to('/'))
-        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))
+        ui.button('Gerar Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))
         ui.button('Cadastro', on_click=lambda: ui.navigate.to('/cliente_cadastro'))
         ui.button('Clientes', on_click=lambda: ui.navigate.to('/cliente_pesquisa'))
         ui.button('Produtos', on_click=lambda: ui.navigate.to('/produto_cadastro'))
 
     with ui.card().classes("w-5/6"):        
         with ui.row().classes("w-full"):
-            name = ui.input(value=cliente.nome, label="Nome Completo", placeholder='entre com o nome...', on_change=lambda e: e.value).classes('w-3/5')
+            name = ui.input(value=cliente.name, label="Nome Completo", placeholder='entre com o nome...', on_change=lambda e: e.value).classes('w-3/5')
             document_id = (ui.input(
                 value=cliente.document,
                 label="CPF",

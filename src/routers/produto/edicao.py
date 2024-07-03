@@ -1,6 +1,6 @@
 from nicegui import APIRouter, ui
 from sqlalchemy import select
-from utils.models import Produto, ProdCategoria, ProdMetrica
+from utils.models import Produto, ProdCategoria, ProdMedida
 from utils import db
 from datetime import datetime
 import asyncio
@@ -52,9 +52,10 @@ def product_edit_page(proddesc: str):
         produto.description     = prod_desc.value        
         produto.price_val       = prod_price.value
         produto.category_id     = prod_category.value
-        produto.metric_id       = prod_metric.value
+        produto.measure_id      = prod_metric.value
         produto.picture         = image.source              
         session.commit()
+        session.refresh(produto)
         ui.notification("Alteração realizada com sucesso!", color='positive')
 
 
@@ -65,7 +66,7 @@ def product_edit_page(proddesc: str):
         with ui.card():
             ui.label("Edite os dados do Cliente").classes("text-xl font-medium text-wrap text-stone-500")            
         ui.button('Início', on_click=lambda: ui.navigate.to('/'))
-        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/'))
+        ui.button('Gerar Pedido', on_click=lambda: ui.navigate.to('/'))
         ui.button('Cadastro', on_click=lambda: ui.navigate.to('/cliente_cadastro'))
         ui.button('Clientes', on_click=lambda: ui.navigate.to('/cliente_pesquisa'))
         ui.button('Produtos', on_click=lambda: ui.navigate.to('/produto_cadastro'))
@@ -80,10 +81,10 @@ def product_edit_page(proddesc: str):
                 format='%.2f'
             ).props('mask="#.##" reverse-fill-mask input-class="text-right"'))
         with ui.row().classes("w-full"):
-            prod_categories = session.scalars(select(ProdCategoria).order_by(ProdCategoria.description)).all()
-            prod_metrics = session.scalars(select(ProdMetrica)).all()
+            prod_categories = session.scalars(select(ProdCategoria).where(ProdCategoria.flag_active == 1).order_by(ProdCategoria.description)).all()
+            prod_metrics = session.scalars(select(ProdMedida).where(ProdMedida.flag_active == 1)).all()
             prod_category = ui.select({p.id:p.description for p in prod_categories}, with_input=True, label="Categoria do Produto", value=produto.category_id).classes('w-60')
-            prod_metric = ui.select({m.id:m.description for m in prod_metrics}, with_input=True, label="Unidade de venda", value=produto.metric_id).classes('w-60')
+            prod_metric = ui.select({m.id:m.description for m in prod_metrics}, with_input=True, label="Unidade de venda", value=produto.measure_id).classes('w-60')
         with ui.row().classes("w-full"):     
             ui.label("Foto do produto:").classes("q-field__label no-pointer-events")
             prod_img = (ui.upload(

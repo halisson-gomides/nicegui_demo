@@ -16,7 +16,7 @@ def search_customer(by:str=None, search_criteria:str=None):
     elif by == "document":        
         search_result = session.scalars(select(models.Cliente).where(models.Cliente.document == search_criteria))
     elif by == "name": 
-        search_result = session.scalars(select(models.Cliente).where(models.Cliente.nome.ilike(f'%{search_criteria}%')))            
+        search_result = session.scalars(select(models.Cliente).where(models.Cliente.name.ilike(f'%{search_criteria}%')))            
     return search_result
     
 
@@ -69,7 +69,7 @@ def render_clients(by=None, sc=None):
     clients_data = []
     for cliente in clientes:
         clients_data.append({
-            'nome': cliente.nome, 
+            'nome': cliente.name, 
             'document': cliente.document, 
             'email': cliente.email,
             'phone': cliente.phone,
@@ -116,27 +116,7 @@ def render_clients(by=None, sc=None):
 
 @pesquisa.page('/cliente_pesquisa')
 def customer_search_form(tipo=None, termo=None) -> None:
-    
-    ui.colors(primary='#06b6d4')    
-    with ui.header(elevated=True).style('background-color: #f1faee').classes('items-center'):
-        with ui.card():    
-            ui.label("Relação de Clientes").classes("text-lg font-medium text-stone-500")
-        ui.button('Início', on_click=lambda: ui.navigate.to('/'))
-        ui.button('Fazer Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))    
-        ui.button('Cadastro', on_click=lambda: ui.navigate.to('/cliente_cadastro'))
-        ui.button('Produtos', on_click=lambda: ui.navigate.to('/produto_cadastro'))
 
-    with ui.card().classes("w-5/6"):        
-        with ui.row().classes("w-full"):
-            name = ui.input(label="Nome do cliente", placeholder='entre com o nome...', on_change=lambda e: e.value).classes('w-3/5')
-            ui.label(" ou ").tailwind('text-center', 'font-bold', 'text-green-600')
-            document_id = (ui.input(
-                label="CPF",
-                placeholder="entre com o cpf...",
-                validation={'Entre com 11 digitos para o cpf': lambda value: len(value) == 14}
-            ).props('mask="###.###.###-##"').classes('w-1/3'))        
-
-           
     def get_action_return(mode='list_all'):
         if mode == 'search':
             mandatory_values = [
@@ -152,8 +132,28 @@ def customer_search_form(tipo=None, termo=None) -> None:
             else:
                 ui.navigate.to(f'/cliente_pesquisa/?tipo=name&termo={name.value}')
         elif mode == 'list_all':
-            ui.navigate.to(f'/cliente_lista/{None}')
-        
+            ui.navigate.to(f'/cliente_pesquisa/{None}')
+
+    
+    ui.colors(primary='#06b6d4')    
+    with ui.header(elevated=True).style('background-color: #f1faee').classes('items-center'):
+        with ui.card():    
+            ui.label("Relação de Clientes").classes("text-lg font-medium text-stone-500")
+        ui.button('Início', on_click=lambda: ui.navigate.to('/'))
+        ui.button('Gerar Pedido', on_click=lambda: ui.navigate.to('/pedido_cadastro'))   
+        ui.button('Pedidos', on_click=lambda: ui.navigate.to('/pedido_pesquisa'))
+        ui.button('Cadastro', on_click=lambda: ui.navigate.to('/cliente_cadastro'))
+        ui.button('Produtos', on_click=lambda: ui.navigate.to('/produto_cadastro'))
+
+    with ui.card().classes("w-5/6"):        
+        with ui.row().classes("w-full  items-center"):
+            name = ui.input(label="Nome do cliente", placeholder='entre com o nome...', on_change=lambda e: e.value).classes('w-3/5')
+            ui.label(" ou ").tailwind('text-center', 'font-bold', 'text-green-600')
+            document_id = (ui.input(
+                label="CPF",
+                placeholder="entre com o cpf...",
+                validation={'Entre com 11 digitos para o cpf': lambda value: len(value) == 14}
+            ).props('mask="###.###.###-##"').classes('w-1/3'))        
 
     with ui.row():
         ui.button("Buscar", on_click=lambda: get_action_return(mode='search')).props('color="green"')
