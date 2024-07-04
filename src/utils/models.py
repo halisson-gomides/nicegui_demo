@@ -1,7 +1,7 @@
 from sqlalchemy import func, ForeignKey
 from sqlalchemy.orm import Mapped, registry, mapped_column
 from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass, relationship
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List
 
 table_registry = registry()
@@ -19,7 +19,8 @@ class Cliente():
     birthdate: Mapped[datetime]   = mapped_column(nullable=True)
     phone: Mapped[str]            = mapped_column(nullable=True)
     instagram: Mapped[str]        = mapped_column(nullable=True)
-    points: Mapped[int]           = mapped_column(init=False, nullable=False, default=0)
+    points: Mapped[float]         = mapped_column(init=False, nullable=False, default=0.0)
+    points_expire: Mapped[datetime]  = mapped_column(init=False, server_default=func.now()) # o cashback expira em 30 dias
     created_at: Mapped[datetime]  = mapped_column(init=False, server_default=func.now())
     
     requests: Mapped[List["Pedido"]] = relationship(back_populates="client", init=False)
@@ -86,7 +87,7 @@ class Pedido():
     casual_client:  Mapped[Optional[str]] = mapped_column(nullable=True)
     table_number:   Mapped[int]           = mapped_column(nullable=False)        
     total_value:    Mapped[float]         = mapped_column(nullable=False)
-    points:         Mapped[int]           = mapped_column(nullable=False, init=False, default=0) # 5% do valor do pedido é convertido em pontos    
+    # points:         Mapped[float]         = mapped_column(nullable=False, init=False, default=0.0) # 5% do valor do pedido é convertido em cashback    
     status:         Mapped[int]           = mapped_column(nullable=False, init=False, default=1)
     created_at:     Mapped[datetime]      = mapped_column(init=False, server_default=func.now())
 

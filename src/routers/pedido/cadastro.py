@@ -98,10 +98,20 @@ def new_request_page(tipo=None, termo=None):
             return  
 
         # Verifica se existe pedido ativo pra mesa informada
-        active_request = session.query(models.Pedido).filter(models.Pedido.table_number == mesa.value).one_or_none()
-        if active_request:
-            ui.notify(f"Já existe um pedido aberto para a mesa {active_request.table_number}", color="negative")
-            return
+        pedidos_mesa = session.query(models.Pedido).filter(models.Pedido.table_number == int(mesa.value)).all()        
+        if len(pedidos_mesa):
+            documento = cliente.value.split(" - ")[-1]            
+            cli_pedido = session.query(models.Cliente).filter(func.lower(models.Cliente.document) == documento.lower()).one_or_none()
+            if cli_pedido:
+                reqs = [p.client_id for p in pedidos_mesa]
+            else:
+                reqs = [p.casual_client.lower() for p in pedidos_mesa]
+
+            if ((cli_pedido and cli_pedido.id in reqs) or 
+                (cliente.value.strip().lower() in reqs)):
+                nome_cliente = cli_pedido.name.upper() if cli_pedido else cliente.value.strip().upper()
+                ui.notify(f"Já existe um pedido aberto para o cliente {nome_cliente}, da mesa {mesa.value:.0f}", color="negative")
+                return
         
         documento = cliente.value.split(" - ")[-1]        
         client_request = session.query(models.Cliente).filter(func.lower(models.Cliente.document) == documento.lower()).one_or_none()
@@ -133,10 +143,7 @@ def new_request_page(tipo=None, termo=None):
             session.commit()
             ui.notify("Pedido gerado com sucesso!", color="positive")
             await asyncio.sleep(1.5)
-            ui.navigate.to("/pedido_cadastro")
-        except exc.IntegrityError:
-            session.rollback()
-            ui.notify("Já existe Produto cadastrado com o nome informado", color="negative")
+            ui.navigate.to("/pedido_pesquisa")
         except Exception as e:
             session.rollback()
             print("Erro ao tentar gerar o pedido:", e.__repr__())

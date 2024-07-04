@@ -91,12 +91,7 @@ def render_clients(by=None, sc=None):
                     <q-tooltip anchor="top left" :offset="[10, 10]">
                     Editar
                     </q-tooltip>
-                </q-btn>
-                <q-btn @click="$parent.$emit('points', props)" icon="change_circle" flat color='teal-5'>
-                    <q-tooltip anchor="top middle" :offset="[20, 20]">
-                    Resgatar pontos
-                    </q-tooltip>
-                </q-btn>
+                </q-btn>                
                 <q-btn @click="$parent.$emit('delete', props)" icon="delete" flat color='red-5' alt='Editar'>
                     <q-tooltip anchor="top right" :offset="[10, 10]">
                     Remover
@@ -104,8 +99,7 @@ def render_clients(by=None, sc=None):
                 </q-btn>
             </q-td>
         """)
-        table.on('edit', lambda msg: edit_client(msg.args['row'], action='edit'))
-        table.on('points', lambda msg: edit_client(msg.args['row'], action='points'))
+        table.on('edit', lambda msg: edit_client(msg.args['row'], action='edit'))        
         table.on('delete', lambda msg: edit_client(msg.args['row'], action='delete'))
     with ui.dialog() as dialog, ui.card():
         ui.label("Tem certeza que quer excluir o cliente?")

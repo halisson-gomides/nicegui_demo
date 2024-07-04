@@ -13,6 +13,42 @@ pesquisa = APIRouter()
 def request_search_form(termos=None) -> None:
 
     def render_requests(sc=None):
+        async def edit_request(e, action:str):
+            id_req = e.args['row']['id']
+            
+            if action == "edit":
+                ui.navigate.to(f"/pedido_edicao/{id_req}")
+            elif action == "delete":
+                await delete_request(e.args['row'])        
+            return
+        
+
+        async def delete_request(row:dict) -> None:
+            # Modal para confirmar exclusao
+            with ui.dialog() as dialog_delete, ui.card():
+                _dtPedido = datetime.strptime(row['data'], '%Y-%m-%dT%H:%M:%S')
+                ui.label("Tem certeza que deseja apagar o Pedido abaixo?")
+                ui.html(f"<h3>Cliente: <b>{row['cliente']}</b> &nbsp;&nbsp;&nbsp;&nbsp; Mesa: <b>{row['mesa']}</b> <br> Data do Pedido: <b>{_dtPedido.strftime('%d/%m/%Y as %H:%M')}</b></h3>")
+                with ui.row():
+                    ui.button('Sim', on_click=lambda: dialog_delete.submit('Sim'), color='warning')
+                    ui.button('Não', on_click=lambda: dialog_delete.submit('Não'), color='warning')
+            
+            result = await dialog_delete
+            if result == "Sim":
+                try:
+                    request_to_delete = session.query(models.Pedido).filter(models.Pedido.id == int(row['id'])).one_or_none()
+                    session.delete(request_to_delete)
+                    session.commit()
+                    ui.notify("Pedido excluído com sucesso!", color="positive")
+                    pedidos_data[:] = [r for r in pedidos_data if r['id'] != row['id']]
+                    tabela_pedidos.update()
+                except Exception as err:
+                    session.rollback()
+                    print(err.__repr__())
+                    ui.notify("Não foi possível excluir o pedido", color='negative')
+                
+
+        
         sc = eval(sc) if sc else None
         
         if sc and validate_type(sc, dict):            
@@ -42,15 +78,15 @@ def request_search_form(termos=None) -> None:
             else:
                 requests = session.query(models.Pedido).all()
            
+            if not len(requests):
+                ui.notify("Pedido não econtrado", color="negative")
         else:
             requests = session.query(models.Pedido).all()
-
-        if not len(requests):
-            ui.notify("Pedido não econtrado", color="negative")
 
         pedidos_columns = [
             {'name': 'nome', 'label': 'Cliente', 'field': 'cliente', 'required': True, 'sortable': True, 'align': 'left'},
             {'name': 'mesa', 'label': 'Mesa', 'field': 'mesa', 'required': True, 'align': 'right'},
+            {'name': 'data', 'label': 'Data do Pedido', 'field': 'data', 'required': True, 'align': 'left', ':format': 'value => value.substr(8,2) + "/" + value.substr(5,2) + "/" + value.substr(0,4) + " " + value.substr(11,5)'},
             {'name': 'vtotal', 'label': 'Valor Total', 'field': 'vtotal', 'required': True, 'align': 'right', ':format': 'value => "R$ " + value.toFixed(2)'},
             {'name': 'status', 'label': 'Status', 'field': 'status', 'align': 'center'},            
             {'name': 'action', 'label': 'Ações', 'field': 'action', 'align': 'center'} 
@@ -58,13 +94,15 @@ def request_search_form(termos=None) -> None:
         pedidos_data = []
         for pedido in requests:        
             pedidos_data.append({
+                'id':       pedido.id,
                 'cliente':  pedido.client.name if pedido.client else pedido.casual_client, 
                 'mesa':     pedido.table_number,
+                'data':     pedido.created_at,
                 'vtotal':   pedido.total_value, 
                 'status':   pedido.status  
             })
-        with ui.table(columns=pedidos_columns, rows=pedidos_data, row_key='cliente', pagination={'rowsPerPage': 20, 'sortBy': 'cliente'}).classes("w-5/6") as table:
-            table.add_slot('body-cell-status', '''
+        with ui.table(columns=pedidos_columns, rows=pedidos_data, row_key='cliente', pagination={'rowsPerPage': 20, 'sortBy': 'cliente'}).classes("w-5/6") as tabela_pedidos:            
+            tabela_pedidos.add_slot('body-cell-status', '''
                 <q-td key="points" :props="props">
                     <q-badge :color="props.value < 1 ? 'pink-5' : 'teal-5'">
                         <span v-if="props.value === 1">Aberto</span>
@@ -72,7 +110,28 @@ def request_search_form(termos=None) -> None:
                     </q-badge>
                 </q-td>
             ''')
+            tabela_pedidos.add_slot(f'body-cell-action', """
+            <q-td :props="props">
+                <q-btn @click="$parent.$emit('edit', props)" icon="edit_note" flat color='warning'>
+                    <q-tooltip anchor="top left" :offset="[10, 10]">
+                    Editar
+                    </q-tooltip>
+                </q-btn>
+                <q-btn @click="$parent.$emit('delete', props)" icon="shopping_cart_checkout" flat color='positive' alt='Concluir'>
+                    <q-tooltip anchor="top right" :offset="[20, 20]">
+                    Concluir o pedido
+                    </q-tooltip>
+                </q-btn>        
+                <q-btn @click="$parent.$emit('delete', props)" icon="delete" flat color='red-5' alt='Apagar'>
+                    <q-tooltip anchor="top right" :offset="[10, 10]">
+                    Apagar
+                    </q-tooltip>
+                </q-btn>
+            </q-td>
+        """)
+        tabela_pedidos.on('delete', lambda msg: edit_request(msg, action='delete'))
 
+     
 
     def get_action_return() -> None:
         mandatory_values = [
